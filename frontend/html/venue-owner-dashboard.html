@@ -1975,6 +1975,15 @@
             return div.innerHTML;
         }
 
+        // All API responses use { success, data: { ... } } envelope.
+        // unwrap() merges outer success flag and inner data payload properties.
+        function unwrap(json) {
+            if (json && json.data != null && typeof json.data === 'object') {
+                return Object.assign({}, json, json.data);
+            }
+            return json || {};
+        }
+
         function getVenueOwnerDisplayName(user) {
             const candidates = [
                 user?.fullName,
@@ -2109,7 +2118,7 @@
                 const response = await fetch(`${API_BASE_URL}/venue-owner/analytics`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                const data = await response.json();
+                const data = unwrap(await response.json());
                 if (data.success) {
                     const stats = data.analytics;
                     document.getElementById('statVenues').textContent = stats.venues.total;
@@ -2134,7 +2143,7 @@
                 const response = await fetch(`${API_BASE_URL}/venue-owner/venues`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                const data = await response.json();
+                const data = unwrap(await response.json());
                 if (data.success && data.venues.length > 0) {
                     dashboardState.venues = data.venues;
                     // Cache globally so the Seat Status tab can populate its dropdown
@@ -2252,7 +2261,7 @@
                     },
                     body: JSON.stringify({ rules, parkingDetails, cateringPolicy, decorationPolicy, musicPolicy })
                 });
-                const data = await response.json();
+                const data = unwrap(await response.json());
                 if (data.success) {
                     alert('Policies updated successfully.');
                     closeEditPolicies();
@@ -2273,7 +2282,7 @@
                 const response = await fetch(`${API_BASE_URL}/venue-owner/booking-requests`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                const data = await response.json();
+                const data = unwrap(await response.json());
                 
                 const countBadge = document.getElementById('requestsCountBadge');
                 if (data.success && data.bookingRequests.length > 0) {
@@ -2328,7 +2337,7 @@
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                const data = await response.json();
+                const data = unwrap(await response.json());
                 if (data.success) {
                     alert(data.message || 'Request accepted successfully!');
                     loadRequests();
@@ -2368,7 +2377,7 @@
                     },
                     body: JSON.stringify({ reason })
                 });
-                const data = await response.json();
+                const data = unwrap(await response.json());
                 if (data.success) {
                     alert('Booking request declined');
                     closeDeclineModal();
@@ -2390,7 +2399,7 @@
                 const response = await fetch(`${API_BASE_URL}/venue-owner/bookings`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                const data = await response.json();
+                const data = unwrap(await response.json());
                 if (data.success && data.bookings.length > 0) {
                     tbody.innerHTML = '';
                     data.bookings.forEach(booking => {
@@ -2443,7 +2452,7 @@
                 const response = await fetch(`${API_BASE_URL}/venue-owner/bookings/history`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                const data = await response.json();
+                const data = unwrap(await response.json());
                 if (data.success && data.bookings.length > 0) {
                     tbody.innerHTML = '';
                     data.bookings.forEach(booking => {
@@ -2483,7 +2492,7 @@
                     method: 'POST',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                const data = await response.json();
+                const data = unwrap(await response.json());
                 if (data.success) {
                     alert(data.message || 'Booking cancelled successfully!');
                     loadBookings();
@@ -2537,7 +2546,7 @@
                 const response = await fetch(`${API_BASE_URL}/venue-owner/venues/${activeVenueId}/bookings-table`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                const data = await response.json();
+                const data = unwrap(await response.json());
                 if (data.success) {
                     allVenueBookings = data.bookings;
                     renderVenueBookingsTable();
@@ -2628,7 +2637,7 @@
                 const response = await fetch(`${API_BASE_URL}/venue-owner/venues/${activeVenueId}/timeline`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                const data = await response.json();
+                const data = unwrap(await response.json());
                 if (data.success) {
                     timelineData = {
                         timeline: data.timeline || [],
@@ -2788,7 +2797,7 @@
                     const response = await fetch(`${API_BASE_URL}/venue-owner/venues`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
-                    const data = await response.json();
+                    const data = unwrap(await response.json());
                     if (data.success) {
                         venues = data.venues || [];
                         dashboardState.venues = venues;
@@ -2843,7 +2852,7 @@
                 const response = await fetch(`${API_BASE_URL}/venue-owner/venues/${venueId}/timeline`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                const data = await response.json();
+                const data = unwrap(await response.json());
                 if (data.success) {
                     ownerCalendarTimelineData = {
                         timeline: data.timeline || [],
@@ -2970,7 +2979,7 @@
                 const response = await fetch(`${API_BASE_URL}/venue-owner/bookings/${bookingId}/details`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                const data = await response.json();
+                const data = unwrap(await response.json());
                 if (data.success) {
                     const b = data.booking;
                     const h = data.host;
@@ -3101,7 +3110,7 @@
                 const response = await fetch(`${API_BASE_URL}/venue-owner/wallet?filter=all`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                const data = await response.json();
+                const data = unwrap(await response.json());
                 if (data.success) {
                     document.getElementById('walletAvailableBalance').textContent = `${data.balance.toFixed(2)} EGP`;
                     document.getElementById('walletFrozenBalance').textContent = `${data.frozenBalance.toFixed(2)} EGP`;
@@ -3146,7 +3155,7 @@
                 const response = await fetch(`${API_BASE_URL}/venue-owner/reviews`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                const data = await response.json();
+                const data = unwrap(await response.json());
                 if (data.success && data.reviews.length > 0) {
                     tbody.innerHTML = '';
                     data.reviews.forEach(rev => {
@@ -3247,7 +3256,7 @@
                 const response = await fetch(`${API_BASE_URL}/venue-owner/venues/${currentBlockVenueId}/availability-blocks`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                const data = await response.json();
+                const data = unwrap(await response.json());
                 
                 if (data.success) {
                     // Populate specific dates
@@ -3321,7 +3330,7 @@
                     },
                     body: JSON.stringify({ blockType, date, weekday, reason })
                 });
-                const data = await response.json();
+                const data = unwrap(await response.json());
                 if (data.success) {
                     alert('Availability block added!');
                     document.getElementById('blockDate').value = '';
@@ -3342,7 +3351,7 @@
                     method: 'PATCH',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                const data = await response.json();
+                const data = unwrap(await response.json());
                 if (data.success) {
                     loadAvailabilityBlocks();
                 } else {
@@ -3360,7 +3369,7 @@
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                const data = await response.json();
+                const data = unwrap(await response.json());
                 if (data.success) {
                     btnEl.closest('tr').remove();
                 } else {
@@ -4041,7 +4050,7 @@
                 const response = await fetch(`${API_BASE_URL}/venue-owner/bookings/${bookingId}/event-team`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-                const data = await response.json();
+                const data = unwrap(await response.json());
                 
                 if (!data.success) {
                     content.innerHTML = `<div style="color:var(--danger); text-align:center;">${escapeHtml(data.message)}</div>`;

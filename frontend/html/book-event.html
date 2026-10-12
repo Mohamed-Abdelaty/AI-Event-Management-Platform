@@ -288,9 +288,11 @@
 
       try {
         const response = await fetch(`${API_BASE_URL}/Events?view=${currentView}`);
-        const data = await response.json();
-        if (!response.ok || !data.success || !Array.isArray(data.events)) {
-          throw new Error(data.message || 'Failed to load events');
+        const json = await response.json();
+        // API returns { success, data: { events: [...] } }
+        const data = json.data || json;
+        if (!response.ok || !json.success || !Array.isArray(data.events)) {
+          throw new Error(data.message || json.error || 'Failed to load events');
         }
         allEvents = data.events;
         filterEvents();
@@ -398,8 +400,9 @@
         const response = await fetch(`${API_BASE_URL}/Favorites/check/${eventId}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        const data = await response.json();
-        if (data.success && data.isFavorited) {
+        const json = await response.json();
+        const data = json.data || json;
+        if (json.success && data.isFavorited) {
           const icon = document.querySelector(`[data-event-id="${eventId}"] .favorite-icon`);
           if (!icon) return;
           icon.classList.add('favorited');
@@ -427,8 +430,8 @@
             method: 'DELETE',
             headers: { Authorization: `Bearer ${token}` }
           });
-          const data = await response.json();
-          if (data.success) {
+          const json = await response.json();
+          if (json.success) {
             element.classList.remove('favorited');
             element.innerHTML = '&#129293;';
             element.setAttribute('title', 'Add to favorites');
@@ -443,14 +446,15 @@
             'Content-Type': 'application/json'
           }
         });
-        const data = await response.json();
-        if (data.success) {
+        const json = await response.json();
+        const data = json.data || json;
+        if (json.success) {
           element.classList.add('favorited');
           element.innerHTML = '&#10084;&#65039;';
           element.setAttribute('title', 'Remove from favorites');
         } else {
-          const errorMsg = data.message || 'Error adding to favorites';
-          console.error('Favorite error:', errorMsg, data);
+          const errorMsg = data.message || json.error || 'Error adding to favorites';
+          console.error('Favorite error:', errorMsg, json);
           if (errorMsg.includes('table') || errorMsg.includes('Table') || errorMsg.includes('not found')) {
             alert('Database error: ' + errorMsg + '\n\nPlease make sure the favorites table exists in the database.');
           } else {

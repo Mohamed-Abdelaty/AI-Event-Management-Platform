@@ -86,6 +86,16 @@
         throw new Error('Unauthorized');
       }
 
+      // Automatically unwrap { success: true, data: { ... } } when response.json() is called
+      const originalJson = response.json.bind(response);
+      response.json = async () => {
+        const raw = await originalJson();
+        if (raw && typeof raw === 'object' && raw.data !== undefined && raw.data !== null && typeof raw.data === 'object') {
+          return Object.assign({}, raw, raw.data);
+        }
+        return raw;
+      };
+
       return response;
     },
     enforceSessionTimeout() {

@@ -558,7 +558,8 @@ ${!mine && !grouped ? `<div class="eeEcUser">${esc(m.username)} ${m.is_host ? '<
         ...(options.headers || {})
       }
     });
-    const data = await res.json().catch(() => ({}));
+    const raw = await res.json().catch(() => ({}));
+    const data = raw && raw.data != null && typeof raw.data === 'object' ? Object.assign({}, raw, raw.data) : raw;
     return { res, data };
   }
 

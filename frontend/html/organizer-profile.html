@@ -245,7 +245,8 @@
             method: 'GET',
             headers: { Authorization: `Bearer ${token}` }
           });
-          const data = await response.json();
+          const raw = await response.json();
+          const data = raw && raw.data != null ? { ...raw, ...raw.data } : raw;
           if (!response.ok || !data.success) {
             throw new Error(data.message || 'Failed to update follow status');
           }
@@ -385,7 +386,8 @@
             headers,
             cache: 'no-store'
           });
-          const data = await response.json();
+          const raw = await response.json();
+          const data = raw && raw.data != null ? { ...raw, ...raw.data } : raw;
           if (!response.ok || !data.success) {
             throw new Error(data.message || 'Unable to load organizer profile');
           }

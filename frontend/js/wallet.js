@@ -177,7 +177,7 @@
     }
 
     if (!response.ok) {
-      const authMessage = String(data?.message || '').toLowerCase();
+      const authMessage = String(data?.message || data?.data?.message || '').toLowerCase();
       const shouldLogout =
         response.status === 401 ||
         (response.status === 403 &&
@@ -192,9 +192,10 @@
         localStorage.setItem('isLoggedIn', 'false');
         window.location.href = 'signin.html';
       }
-      throw new Error(data.message || 'Request failed');
+      throw new Error(data?.message || data?.data?.message || 'Request failed');
     }
-    return data;
+    // API wraps all responses as { success, data: { ... } }
+    return data.data != null ? data.data : data;
   }
 
   function setupMenuToggle() {

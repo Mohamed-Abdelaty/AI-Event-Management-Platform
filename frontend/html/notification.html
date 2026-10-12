@@ -408,9 +408,11 @@
           }
         });
 
-        const data = await response.json();
-        if (!response.ok || !data.success || !Array.isArray(data.notifications)) {
-          throw new Error(data.message || 'Error loading notifications');
+        const json = await response.json();
+        // API returns { success, data: { notifications: [...] } }
+        const data = json.data || json;
+        if (!response.ok || !json.success || !Array.isArray(data.notifications)) {
+          throw new Error(data.message || json.error || 'Error loading notifications');
         }
 
         allNotifications = data.notifications;

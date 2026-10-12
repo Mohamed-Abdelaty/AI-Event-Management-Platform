@@ -1741,7 +1741,8 @@
         Authorization: `Bearer ${token}`
       };
       const response = await fetch(url, { ...options, headers });
-      const data = await response.json().catch(() => ({}));
+      const raw = await response.json().catch(() => ({}));
+      const data = raw && raw.data != null ? { ...raw, ...raw.data } : raw;
       if (response.status === 401) {
         window.location.href = '/html/signin.html';
         throw new Error('Session expired. Please sign in again.');
@@ -2381,7 +2382,8 @@
         const res = await fetch(`${API_BASE_URL}/direct-chat/my-chats`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
-        const data = await res.json();
+        const raw = await res.json();
+        const data = raw && raw.data != null && typeof raw.data === 'object' ? Object.assign({}, raw, raw.data) : raw;
         if (data.success && data.chats) {
           const chatForThisEvent = data.chats.find(c => String(c.event_id) === String(eventId));
           if (chatForThisEvent) {
@@ -2392,12 +2394,13 @@
             const msgRes = await fetch(`${API_BASE_URL}/direct-chat/${currentVenueBookingId}/messages`, {
               headers: { 'Authorization': `Bearer ${token}` }
             });
-            const msgData = await msgRes.json();
+            const msgRaw = await msgRes.json();
+            const msgData = msgRaw && msgRaw.data != null && typeof msgRaw.data === 'object' ? Object.assign({}, msgRaw, msgRaw.data) : msgRaw;
             
             if (msgData.success) {
               const container = document.getElementById('directChatMessages');
               container.innerHTML = '';
-              msgData.messages.forEach(msg => appendDirectMessage(msg));
+              (msgData.messages || []).forEach(msg => appendDirectMessage(msg));
               scrollToBottomDirect();
             }
 

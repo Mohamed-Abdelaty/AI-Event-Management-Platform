@@ -148,9 +148,11 @@
           }
         });
 
-        const data = await response.json();
+        const json = await response.json();
+        // API returns { success, data: { events: [...] } }
+        const data = json.data || json;
 
-        if (data.success && data.events.length > 0) {
+        if (json.success && Array.isArray(data.events) && data.events.length > 0) {
           displayEvents(data.events);
         } else {
           document.getElementById('eventsGrid').innerHTML = `

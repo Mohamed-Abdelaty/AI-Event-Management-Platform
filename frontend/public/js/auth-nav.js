@@ -304,7 +304,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 cache: 'no-store'
             });
             if (!response.ok) return null;
-            return await response.json();
+            const json = await response.json();
+            // API wraps all responses as { success, data: { ... } }
+            // Return the inner data so callers don't need to unwrap
+            return json.data != null ? json.data : json;
         } catch (_) {
             return null;
         }
@@ -498,6 +501,14 @@ document.addEventListener('DOMContentLoaded', function () {
         if (loggedIn) {
             updateProfileUiFromData(getStoredUser());
             hydrateLoggedInMeta();
+
+            // Load floating event chat widget automatically if not already present
+            if (!document.querySelector('script[src*="floating-event-chat.js"]') && !window.__eeFloatingEventChatInitialized) {
+                const chatScript = document.createElement('script');
+                chatScript.src = '/public/js/floating-event-chat.js';
+                chatScript.defer = true;
+                document.body.appendChild(chatScript);
+            }
         }
     }
 

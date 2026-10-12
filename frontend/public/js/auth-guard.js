@@ -112,8 +112,10 @@
                 cache: 'no-store'
             });
             if (!response.ok) return null;
-            const data = await response.json().catch(() => null);
-            if (!data) return null;
+            const json = await response.json().catch(() => null);
+            if (!json) return null;
+            // API returns { success, data: { locked, maintenanceMode, siteName, message } }
+            const data = json.data || json;
             return {
                 locked: Boolean(data.locked),
                 maintenanceMode: Boolean(data.maintenanceMode),
@@ -212,8 +214,10 @@
 
             if (response.ok) {
                 // Token is valid
-                const data = await response.json();
-                handleLoggedIn(page, isAuthPage, data.user);
+                const json = await response.json();
+                // API returns { success, data: { user } }
+                const data = json.data || json;
+                handleLoggedIn(page, isAuthPage, data.user || data);
             } else {
                 // Treat only explicit auth failures as invalid token.
                 if (response.status === 401 || response.status === 403) {

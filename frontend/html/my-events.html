@@ -265,9 +265,11 @@
         const response = await fetch(`${API_BASE_URL}/Events/my/events`, {
           headers: { Authorization: `Bearer ${token}` }
         });
-        const data = await response.json();
-        if (!response.ok || !data.success || !Array.isArray(data.events)) {
-          throw new Error(data.message || 'Failed to load events');
+        const json = await response.json();
+        // API returns { success, data: { events: [...] } }
+        const data = json.data || json;
+        if (!response.ok || !json.success || !Array.isArray(data.events)) {
+          throw new Error(data.message || json.error || 'Failed to load events');
         }
 
         if (data.events.length === 0) {
@@ -429,9 +431,11 @@
           headers: { Authorization: `Bearer ${token}` },
           cache: 'no-store'
         });
-        const data = await response.json();
-        if (!response.ok || !data.success || !Array.isArray(data.bookings)) {
-          throw new Error(data.message || 'Failed to load bookings');
+        const json = await response.json();
+        // API returns { success, data: { bookings: [...] } }
+        const data = json.data || json;
+        if (!response.ok || !json.success || !Array.isArray(data.bookings)) {
+          throw new Error(data.message || json.error || 'Failed to load bookings');
         }
 
         const nowMs = Date.now();

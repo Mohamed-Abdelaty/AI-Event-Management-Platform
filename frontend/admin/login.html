@@ -94,9 +94,10 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ adminId, password })
         });
-        const data = await response.json();
-        if (!response.ok || !data.success) {
-          throw new Error(data.message || 'Login failed');
+        const raw = await response.json();
+        const data = raw && raw.data != null ? { ...raw, ...raw.data } : raw;
+        if (!response.ok || !raw.success) {
+          throw new Error(raw.message || data.message || 'Login failed');
         }
         AdminApp.setToken(data.token);
         window.location.href = '/admin/index.html';

@@ -32,8 +32,9 @@ async function loadDirectChats() {
     const res = await fetch(`${_apiBase()}/direct-chat/my-chats`, {
       headers: { 'Authorization': `Bearer ${_token()}` }
     });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.message);
+    const raw = await res.json();
+    const data = raw && raw.data != null && typeof raw.data === 'object' ? Object.assign({}, raw, raw.data) : raw;
+    if (!data.success) throw new Error(data.message || data.error);
 
     const chats = data.chats || [];
     let totalUnread = 0;
@@ -116,11 +117,13 @@ async function openDirectChat(venueBookingId, otherPartyName, eventTitle, venueN
     const res = await fetch(`${_apiBase()}/direct-chat/${venueBookingId}/messages`, {
       headers: { 'Authorization': `Bearer ${_token()}` }
     });
-    const data = await res.json();
-    if (!data.success) throw new Error(data.message);
+    const raw = await res.json();
+    const data = raw && raw.data != null && typeof raw.data === 'object' ? Object.assign({}, raw, raw.data) : raw;
+    if (!data.success) throw new Error(data.message || data.error);
 
     messagesContainer.innerHTML = '';
-    data.messages.forEach(msg => appendDirectMessage(msg));
+    const messages = data.messages || [];
+    messages.forEach(msg => appendDirectMessage(msg));
     scrollToBottom();
 
     // Mark as read

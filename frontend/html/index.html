@@ -587,11 +587,13 @@
 
       async function fetchEvents(view) {
         const response = await fetch(`${API_BASE_URL}/Events?view=${encodeURIComponent(view)}`, { cache: 'no-store' });
-        const data = await response.json();
-        if (!response.ok || !data.success || !Array.isArray(data.events)) {
-          throw new Error(data.message || `Failed to load ${view} events`);
+        const json = await response.json();
+        // API returns { success, data: { events: [...] } }
+        const payload = json.data || json;
+        if (!response.ok || !json.success || !Array.isArray(payload.events)) {
+          throw new Error(payload.message || json.error || `Failed to load ${view} events`);
         }
-        return data.events;
+        return payload.events;
       }
 
       async function loadHomepageData() {
