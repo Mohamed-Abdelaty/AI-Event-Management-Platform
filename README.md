@@ -382,3 +382,5 @@ This generates:
 Contributions, feature suggestions, and bug reports are welcome! Please open an issue or submit a pull request.
 
 This project is licensed under the **ISC License**.
+#   A I - E v e n t - M a n a g e m e n t - P l a t f o r m  
+ 
